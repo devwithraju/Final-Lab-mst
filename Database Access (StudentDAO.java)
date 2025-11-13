@@ -1,0 +1,88 @@
+package com.student.dao;
+
+import java.sql.*;
+import java.util.*;
+import com.student.model.Student;
+
+public class StudentDAO {
+    private static String jdbcURL = "jdbc:mysql://localhost:3306/studentdb";
+    private static String jdbcUsername = "root";
+    private static String jdbcPassword = "1234";
+    private static Connection con = null;
+
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Insert
+    public static void addStudent(Student s) {
+        try {
+            PreparedStatement ps = con.prepareStatement("INSERT INTO student(name,email,course) VALUES(?,?,?)");
+            ps.setString(1, s.getName());
+            ps.setString(2, s.getEmail());
+            ps.setString(3, s.getCourse());
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // View
+    public static List<Student> getAllStudents() {
+        List<Student> list = new ArrayList<>();
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM student");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Student s = new Student();
+                s.setId(rs.getInt(1));
+                s.setName(rs.getString(2));
+                s.setEmail(rs.getString(3));
+                s.setCourse(rs.getString(4));
+                list.add(s);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // Get by ID
+    public static Student getStudentById(int id) {
+        Student s = new Student();
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM student WHERE id=?");
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                s.setId(rs.getInt(1));
+                s.setName(rs.getString(2));
+                s.setEmail(rs.getString(3));
+                s.setCourse(rs.getString(4));
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return s;
+    }
+
+    // Update
+    public static void updateStudent(Student s) {
+        try {
+            PreparedStatement ps = con.prepareStatement("UPDATE student SET name=?, email=?, course=? WHERE id=?");
+            ps.setString(1, s.getName());
+            ps.setString(2, s.getEmail());
+            ps.setString(3, s.getCourse());
+            ps.setInt(4, s.getId());
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    // Delete
+    public static void deleteStudent(int id) {
+        try {
+            PreparedStatement ps = con.prepareStatement("DELETE FROM student WHERE id=?");
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+}
